@@ -1,0 +1,5 @@
+You create a PCollection by either reading data from an external source using Beam’s Source API,
+Or you can create a PCollection of data stored in an in-memory collection class in your driver program.
+The former is typically how a production pipeline would ingest data.
+Beam’s Source APIs contain adapters to help you read from external sources like large cloud-based files, databases, or subscription services.
+The latter is primarily useful for testing and debugging purposes.
