@@ -6,6 +6,7 @@ import com.google.api.services.bigquery.model.TableSchema;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
+import org.apache.arrow.flatbuf.Bool;
 import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
 import org.apache.beam.runners.dataflow.options.DataflowProfilingOptions;
 import org.apache.beam.runners.dataflow.options.DataflowProfilingOptions.DataflowProfilingAgentConfiguration;
@@ -45,21 +46,20 @@ public class SensorRunner{
                 .withValidation()
                 .as(MyPipelineOptions.class);
 
-        DataflowProfilingOptions profilingOptions = ops.as(DataflowProfilingOptions.class);
+        //DataflowProfilingOptions profilingOptions = ops.as(DataflowProfilingOptions.class);
         ///profilingOptions.setSaveProfilesToGcs("gs://" + ops.getProject() + "/profiler");
+        //DataflowProfilingAgentConfiguration agent = new DataflowProfilingOptions.DataflowProfilingAgentConfiguration();
+        //agent.put("APICurated", true);
+        //profilingOptions.setProfilingAgentConfiguration(agent);
 
-        // --setProfilingAgentConfiguration= {"APICurated", true}
-        DataflowProfilingAgentConfiguration agent = new DataflowProfilingOptions.DataflowProfilingAgentConfiguration();
-        agent.put("APICurated", true);
-        profilingOptions.setProfilingAgentConfiguration(agent);
         Pipeline pipe = Pipeline.create(ops);
 
         SensorXmlEventToBQJob job = new SensorXmlEventToBQJob();
         job.setProjectName(ops.getProject());
         job.setTopicName(ops.getTopic());
         job.setBqTable(ops.getBqTable());
-        job.setCpuLoad(ops.getCpuLoad());
-        job.setMemLoad(ops.getMemLoad());
+        job.setLoadFlag(Boolean.parseBoolean(ops.getCpuLoad()));
+
 
         job.execute(pipe);
         pipe.run();

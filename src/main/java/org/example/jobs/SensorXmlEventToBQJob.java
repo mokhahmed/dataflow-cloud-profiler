@@ -24,27 +24,19 @@ import static java.lang.Integer.MAX_VALUE;
 
 public class SensorXmlEventToBQJob extends AbstractPipeline{
 
-    private int LOAD_FACTOR =10000;
-    String topicName;
-    String projectName;
-    String bqTable;
-    String cpuLoad;
-    String memLoad;
+    private int LOAD_FACTOR =100000;
+    private String topicName;
+    private String projectName;
+    private String bqTable;
+    private Boolean cpuLoad;
+    private Boolean loadFlag;
 
-    public String getCpuLoad() {
+    public Boolean getLoadFlag() {
         return cpuLoad;
     }
 
-    public void setCpuLoad(String cpuLoad) {
+    public void setLoadFlag(Boolean cpuLoad) {
         this.cpuLoad = cpuLoad;
-    }
-
-    public String getMemLoad() {
-        return memLoad;
-    }
-
-    public void setMemLoad(String memLoad) {
-        this.memLoad = memLoad;
     }
 
     public String getBqTable() {
@@ -75,7 +67,6 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
 
     @Override
     public PCollection<String> extract(Pipeline pipe) {
-        if(getCpuLoad().equalsIgnoreCase("true")) load_cpu_func(LOAD_FACTOR);
         String topicName = "projects/" + getProjectName() + "/topics/"+ getTopicName();
         return pipe.apply("Read xml events", readInput(topicName));
     }
@@ -122,7 +113,7 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
 
     public BigQueryIO.Write<TableRow> writeToBQTable(String tableName){
 
-        if(getCpuLoad().equalsIgnoreCase("true")) load_cpu_func(LOAD_FACTOR);
+        if(getLoadFlag()) loadFunc(LOAD_FACTOR);
 
         List<TableFieldSchema> fields = new ArrayList<>();
         fields.add(new TableFieldSchema().setName("timestamp").setType("STRING"));
@@ -145,9 +136,8 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
 
     public SensorEvent buildEvent(String xmlEvent) {
         try {
-            if(getCpuLoad().equalsIgnoreCase("true")) load_cpu_func(LOAD_FACTOR);
 
-            if(getMemLoad().equalsIgnoreCase("true")) load_memory_func(LOAD_FACTOR);
+            if(getLoadFlag()) loadFunc(LOAD_FACTOR);
 
             JAXBContext jaxbContext = JAXBContext.newInstance(SensorEvent.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
@@ -159,13 +149,7 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
         return null;
     }
 
-    public void load_cpu_func(int factor){
-        for(int i=1;i<factor;i++) {
-            float r = MAX_VALUE/2;
-        }
-    }
-
-    public void load_memory_func(int factor){
+    public void loadFunc(int factor){
         List<Integer> ls = new ArrayList<>();
         for(int i=1;i<factor;i++) {
             ls.add(Integer.valueOf(i));

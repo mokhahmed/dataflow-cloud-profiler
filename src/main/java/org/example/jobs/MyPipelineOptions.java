@@ -17,15 +17,11 @@ public interface MyPipelineOptions extends DataflowPipelineOptions {
     void setBqTable(String bqTable);
 
 
-    @Description("CPU Load Flag")
+    @Description("Load Flag")
     @Default.String("false")
-    String getCpuLoad();
-    void setCpuLoad(String cpuLoad);
+    String getLoadFlag();
+    void setLoadFlag(String cpuLoad);
 
-    @Description("memory Load Flag")
-    @Default.String("false")
-    String getMemLoad();
-    void setMemLoad(String memLoad);
 
 
 }
