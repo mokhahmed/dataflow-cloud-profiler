@@ -73,7 +73,8 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
 
     @Override
     public PCollection<TableRow> transform(PCollection<String> dataset) {
-         return dataset.apply("Parse xml events", parseEvents())
+         return dataset
+                 .apply("Parse xml events", parseEvents())
                  .apply("Convert to BQ row", toBQRow());
     }
 
@@ -81,7 +82,6 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
     public WriteResult load(PCollection<TableRow> dataset) {
         String sensorEventsTable = getProjectName() + ":" + getBqTable();
         return  dataset.apply("Write to BQ", writeToBQTable(sensorEventsTable));
-
     }
 
     public  PubsubIO.Read<String> readInput(String topicName){
@@ -127,7 +127,9 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
 
         TableSchema schema = new TableSchema().setFields(fields);
 
-        return BigQueryIO.writeTableRows().to(tableName)
+        return BigQueryIO
+                .writeTableRows()
+                .to(tableName)
                 .withSchema(schema)
                 .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
                 .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED);

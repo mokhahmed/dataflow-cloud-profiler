@@ -58,7 +58,7 @@ public class SensorRunner{
         job.setProjectName(ops.getProject());
         job.setTopicName(ops.getTopic());
         job.setBqTable(ops.getBqTable());
-        job.setLoadFlag(Boolean.parseBoolean(ops.getCpuLoad()));
+        job.setLoadFlag(Boolean.parseBoolean(ops.getLoadFlag()));
 
 
         job.execute(pipe);
