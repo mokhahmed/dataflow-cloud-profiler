@@ -6,8 +6,6 @@ import com.google.api.services.bigquery.model.TableSchema;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
-import org.apache.beam.runners.dataflow.options.DataflowProfilingOptions;
-import org.apache.beam.runners.dataflow.options.DataflowProfilingOptions.DataflowProfilingAgentConfiguration;
 import org.apache.beam.sdk.io.gcp.bigquery.WriteResult;
 import org.apache.beam.sdk.values.PCollection;
 import org.example.models.SensorEvent;
@@ -19,7 +17,6 @@ import org.apache.beam.sdk.values.TypeDescriptor;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import static java.lang.Integer.MAX_VALUE;
 
 
 public class SensorXmlEventToBQJob extends AbstractPipeline{
@@ -28,15 +25,14 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
     private String topicName;
     private String projectName;
     private String bqTable;
-    private Boolean cpuLoad;
     private Boolean loadFlag;
 
     public Boolean getLoadFlag() {
-        return cpuLoad;
+        return loadFlag;
     }
 
-    public void setLoadFlag(Boolean cpuLoad) {
-        this.cpuLoad = cpuLoad;
+    public void setLoadFlag(Boolean loadFlag) {
+        this.loadFlag = loadFlag;
     }
 
     public String getBqTable() {
@@ -90,7 +86,7 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
 
     public  MapElements<String, SensorEvent>  parseEvents(){
         return MapElements.into(new TypeDescriptor<SensorEvent>(){})
-                .via( (String l) -> buildEvent(l));
+                .via( (String l) -> parseEventFromXml(l));
     }
 
     public  MapElements<SensorEvent, TableRow> toBQRow(){
@@ -113,37 +109,50 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
 
     public BigQueryIO.Write<TableRow> writeToBQTable(String tableName){
 
-        if(getLoadFlag()) loadFunc(LOAD_FACTOR);
 
         List<TableFieldSchema> fields = new ArrayList<>();
-        fields.add(new TableFieldSchema().setName("timestamp").setType("STRING"));
-        fields.add(new TableFieldSchema().setName("latitude").setType("STRING"));
-        fields.add(new TableFieldSchema().setName("longitude").setType("STRING"));
+        fields.add(new TableFieldSchema().setName("timestamp").setType("TIMESTAMP"));
+        fields.add(new TableFieldSchema().setName("latitude").setType("FLOAT64"));
+        fields.add(new TableFieldSchema().setName("longitude").setType("FLOAT64"));
         fields.add(new TableFieldSchema().setName("highway").setType("STRING"));
         fields.add(new TableFieldSchema().setName("direction").setType("STRING"));
         fields.add(new TableFieldSchema().setName("lane").setType("STRING"));
-        fields.add(new TableFieldSchema().setName("speed").setType("STRING"));
+        fields.add(new TableFieldSchema().setName("speed").setType("FLOAT64"));
         fields.add(new TableFieldSchema().setName("sensorId").setType("STRING"));
 
         TableSchema schema = new TableSchema().setFields(fields);
+
+        if(getLoadFlag())
 
         return BigQueryIO
                 .writeTableRows()
                 .to(tableName)
                 .withSchema(schema)
+                .withNumFileShards(100000)
+                .withMaxBytesPerPartition(1)
                 .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
                 .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED);
+
+        else
+
+            return BigQueryIO
+                    .writeTableRows()
+                    .to(tableName)
+                    .withSchema(schema)
+                    .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
+                    .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED);
     }
 
 
-    public SensorEvent buildEvent(String xmlEvent) {
+    public SensorEvent parseEventFromXml(String xmlEvent) {
         try {
 
             if(getLoadFlag()) loadFunc(LOAD_FACTOR);
 
             JAXBContext jaxbContext = JAXBContext.newInstance(SensorEvent.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            SensorEvent sensor = (SensorEvent) jaxbUnmarshaller.unmarshal(new StringReader(xmlEvent));
+            String trimmedEvent = xmlEvent.replace("b'", "").replace("\\n'", "");
+            SensorEvent sensor = (SensorEvent) jaxbUnmarshaller.unmarshal(new StringReader(trimmedEvent));
             return sensor;
         } catch (JAXBException e) {
             e.printStackTrace();

@@ -8,6 +8,8 @@ import org.apache.beam.sdk.coders.AvroCoder;
 import org.apache.beam.sdk.coders.DefaultCoder;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.util.Date;
 
 
 //@DefaultCoder(AvroCoder.class)
@@ -16,12 +18,12 @@ public class SensorEvent implements Serializable {
 
     private String id;
     private String timestamp;
-    private String latitude;
-    private String longitude;
+    private Float latitude;
+    private Float longitude;
     private String highway;
     private String direction;
     private String lane;
-    private String speed;
+    private Float speed;
 
 
     public SensorEvent() {
@@ -47,20 +49,20 @@ public class SensorEvent implements Serializable {
     }
 
     @XmlElement
-    public String getLatitude() {
+    public Float getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(Float latitude) {
         this.latitude = latitude;
     }
 
     @XmlElement
-    public String getLongitude() {
+    public Float getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(Float longitude) {
         this.longitude = longitude;
     }
 
@@ -92,11 +94,11 @@ public class SensorEvent implements Serializable {
     }
 
     @XmlElement
-    public String getSpeed() {
+    public Float getSpeed() {
         return speed;
     }
 
-    public void setSpeed(String speed) {
+    public void setSpeed(Float speed) {
         this.speed = speed;
     }
 

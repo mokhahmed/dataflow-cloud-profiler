@@ -45,7 +45,9 @@ public class TestJob {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(SensorEvent.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            SensorEvent sensor = (SensorEvent) jaxbUnmarshaller.unmarshal(new StringReader(xmlEvent));
+            String trimmedEvent = xmlEvent.replace("b'", "").replace("\\n'", "");
+            System.out.println(trimmedEvent);
+            SensorEvent sensor = (SensorEvent) jaxbUnmarshaller.unmarshal(new StringReader(trimmedEvent));
             return sensor;
         } catch (JAXBException e) {
             e.printStackTrace();
