@@ -22,10 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SensorXmlEventToBQJob extends AbstractPipeline{
+public class SensorXmlEventToBQJobOptimized extends AbstractPipeline{
 
     private static int LOAD_FACTOR =1000000;
-    private static int NUM_SHARDS =1000000;
+    private static int NUM_SHARDS =3;
+
     private String topicName;
     private String projectName;
     private String bqTable;
@@ -73,19 +74,18 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
 
     @Override
     public PCollection<SensorEvent> transform(PCollection<String> dataset) {
-         return dataset.apply("Parse xml events", parseEvents());
+        return dataset.apply("Parse xml events", parseEvents());
     }
 
 
     @Override
     public PDone load(PCollection<SensorEvent> dataset) {
-
+        String bucketName =  getBqTable() + "_optimized";
         return  dataset.apply(Window.into(FixedWindows.of(Duration.standardMinutes(1))))
-                .apply("Write to Bucket", writeAvroFilesToGCS(getBqTable(), NUM_SHARDS));
+                .apply("Write to Bucket", writeAvroFilesToGCS(bucketName, NUM_SHARDS));
     }
 
     public  PubsubIO.Read<String> readInput(String topicName){
-
         return PubsubIO.readStrings().fromTopic(topicName);
     }
 
@@ -94,7 +94,6 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
     }
 
     public AvroIO.Write<SensorEvent>  writeAvroFilesToGCS(String bucketName, int numShards){
-
         String bucketPath =  "gs://"+ getProjectName() +"/"+ bucketName;
         String tempPath =  "gs://"+ getProjectName() +"/sensors_temp_location_"+bucketName;
         return AvroIO
@@ -108,8 +107,6 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
 
     public SensorEvent parseEventFromXml(String xmlEvent) {
         try {
-
-            eatMemory(LOAD_FACTOR);
             JAXBContext jaxbContext = JAXBContext.newInstance(SensorEvent.class);
             Unmarshaller jaxbUnMarshaller = jaxbContext.createUnmarshaller();
             String trimmedEvent = xmlEvent.replace("b'", "").replace("\\n'", "");
@@ -121,17 +118,5 @@ public class SensorXmlEventToBQJob extends AbstractPipeline{
         return null;
     }
 
-    public void eatMemory(int factor){
-        List<Integer> ls = new ArrayList<>();
-        for(int i=1;i<factor;i++) {
-            ls.add(Integer.valueOf(i));
-        }
-    }
-
-    public int loadCPU(int factor){
-        int c = 0;
-        for(int i=1;i<factor;i++)  c++;
-        return c;
-    }
 
 }

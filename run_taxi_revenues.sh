@@ -3,7 +3,8 @@
 export GOOGLE_APPLICATION_CREDENTIALS="/Users/moukhtar/ws/mk-sa-1-key.json"
 
 if [ "$#" -lt 3 ]; then
-   echo "Usage:   ./run_oncloud_from_local.sh project-name bucket-name classname [options] "
+   echo "Usage:   ./run_oncloud.sh project-name bucket-name classname [options] "
+   echo "Example: ./run_oncloud.sh cloud-training-demos cloud-training-demos CurrentConditions --bigtable"
    exit
 fi
 
@@ -19,8 +20,7 @@ echo "Launching $MAIN project=$PROJECT bucket=$BUCKET $*"
 "$MAVEN_HOME"/mvn compile -e exec:java \
  -Dexec.mainClass=$MAIN \
       -Dexec.args="--project=$PROJECT \
-      --bqTable=sensor_events\
-      --region=europe-central2\
+       --region=us-east1\
       --stagingLocation=gs://$BUCKET/staging/ $* \
       --tempLocation=gs://$BUCKET/staging/ \
       --runner=DataflowRunner\

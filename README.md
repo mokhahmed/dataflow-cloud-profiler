@@ -55,3 +55,8 @@ Wall time| |Y|Y|Y
 For complete information on the language requirements and any restrictions, see the language's how-to page.
 For more information about these profile types, see[ Profiling concepts.](https://cloud.google.com/profiler/docs/concepts-profiling)
 
+### To Run the Demo 
+
+1. Create a pub/sub topic sensor_events 
+2. Run the python script to generate the sample data ```python send_sensor_xml_data.py --project PROJECCT_ID --speedFactor 60```
+3.  

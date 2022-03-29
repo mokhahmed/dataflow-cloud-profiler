@@ -16,12 +16,4 @@ public interface MyPipelineOptions extends DataflowPipelineOptions {
     String getBqTable();
     void setBqTable(String bqTable);
 
-
-    @Description("Load Flag")
-    @Default.String("false")
-    String getLoadFlag();
-    void setLoadFlag(String cpuLoad);
-
-
-
 }
