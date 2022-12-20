@@ -1,6 +1,6 @@
 # dataflow-cloud-profiler
 
-## How to integrate Google cloud profile with Dataflow jobs**
+## How to integrate Google cloud profile with Dataflow jobs
 
 1. By passing the --dataflowServiceOptions options
 
