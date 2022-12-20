@@ -38,7 +38,7 @@
   profilingOptions.setProfilingAgentConfiguration(agent);
 ```
 
-##**Types of profiling available**
+### Types of profiling available
 
 Cloud Profiler supports different types of profiling based on the language in which a program is written. 
 The following table summarizes the supported profile types by language:
