@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export GOOGLE_APPLICATION_CREDENTIALS="/Users/moukhtar/ws/mk-sa-1-key.json"
-
 if [ "$#" -lt 3 ]; then
    echo "Usage:   ./run_oncloud.sh project-name bucket-name classname [options] "
    echo "Example: ./run_oncloud.sh cloud-training-demos cloud-training-demos CurrentConditions --bigtable"
